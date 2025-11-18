@@ -205,12 +205,6 @@ const Login = () => {
             >
               Forgot your password?
             </Link>
-            <p className="text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/auth/signup" className="text-primary hover:underline">
-                Create Account
-              </Link>
-            </p>
           </div>
         </div>
       </div>

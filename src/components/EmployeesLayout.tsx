@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 
-const Dashboard = () => {
+export default function EmployeesLayout() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -32,19 +32,9 @@ const Dashboard = () => {
               </Button>
             </div>
           </header>
-
-          <main className="flex-1 p-4 md:p-8">
-            <div className="rounded-lg border border-border bg-card p-8 shadow-sm">
-              <h2 className="text-2xl font-bold text-foreground">Welcome to your Dashboard</h2>
-              <p className="mt-2 text-muted-foreground">
-                You are successfully logged in as <span className="font-medium text-foreground">{user?.email}</span>
-              </p>
-            </div>
-          </main>
+          <Outlet />
         </div>
       </div>
     </SidebarProvider>
   );
-};
-
-export default Dashboard;
+}

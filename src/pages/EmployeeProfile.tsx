@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEmployees } from '@/contexts/EmployeesContext';
+import { useTeams } from '@/contexts/TeamsContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +20,7 @@ import {
   TrendingUp,
   Users,
   Link as LinkIcon,
+  UsersRound,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Employee, EmployeeStatus, EmployeeRole } from '@/types/employee';
@@ -42,9 +44,11 @@ export default function EmployeeProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getEmployeeById, getEmployeesByManager } = useEmployees();
+  const { getTeamsByMember } = useTeams();
 
   const employee = getEmployeeById(id!);
   const directReports = employee ? getEmployeesByManager(employee.id) : [];
+  const teams = employee ? getTeamsByMember(employee.id) : [];
 
   if (!employee) {
     return (
@@ -165,6 +169,47 @@ export default function EmployeeProfile() {
                 </div>
               </CardContent>
             </Card>
+
+            {teams.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UsersRound className="h-5 w-5" />
+                    Teams
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {teams.map(team => (
+                    <div
+                      key={team.id}
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                      onClick={() => navigate(`/teams/${team.id}`)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={team.avatar} />
+                          <AvatarFallback>
+                            {team.name.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{team.name}</p>
+                          <p className="text-sm text-muted-foreground">{team.department}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {team.managerIds.includes(employee.id) && (
+                          <Badge variant="outline">Manager</Badge>
+                        )}
+                        <Badge variant={team.status === 'active' ? 'default' : 'secondary'}>
+                          {team.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
             {employee.skills && employee.skills.length > 0 && (
               <Card>

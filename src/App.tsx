@@ -16,10 +16,6 @@ import Employees from "./pages/Employees";
 import EmployeeProfile from "./pages/EmployeeProfile";
 import EmployeeNew from "./pages/EmployeeNew";
 import EmployeeEdit from "./pages/EmployeeEdit";
-import Teams from "./pages/Teams";
-import TeamDetail from "./pages/TeamDetail";
-import TeamNew from "./pages/TeamNew";
-import TeamEdit from "./pages/TeamEdit";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

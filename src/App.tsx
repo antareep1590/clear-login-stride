@@ -25,6 +25,7 @@ const App = () => (
     <AuthProvider>
       <EmployeesProvider>
         <TeamsProvider>
+          <ClientsProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />

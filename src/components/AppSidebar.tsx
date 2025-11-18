@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users } from 'lucide-react';
+import { LayoutDashboard, Users, UsersRound } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
   Sidebar,
@@ -15,6 +15,7 @@ import {
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Employees', url: '/employees', icon: Users },
+  { title: 'Teams', url: '/teams', icon: UsersRound },
 ];
 
 export function AppSidebar() {

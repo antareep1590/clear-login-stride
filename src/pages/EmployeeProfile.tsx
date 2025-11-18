@@ -352,18 +352,16 @@ export default function EmployeeProfile() {
                 <UsersRound className="h-5 w-5" />
                 My Teams
               </h3>
-              {(employee.role === 'manager' || employee.role === 'admin' || employee.role === 'executive') && (
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    setEditingTeam(null);
-                    setTeamFormOpen(true);
-                  }}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Team
-                </Button>
-              )}
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditingTeam(null);
+                  setTeamFormOpen(true);
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create Team
+              </Button>
             </div>
 
             {teams.length > 0 ? (

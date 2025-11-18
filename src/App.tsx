@@ -14,6 +14,7 @@ import EmployeesLayout from "./components/EmployeesLayout";
 import Employees from "./pages/Employees";
 import EmployeeProfile from "./pages/EmployeeProfile";
 import EmployeeNew from "./pages/EmployeeNew";
+import EmployeeEdit from "./pages/EmployeeEdit";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
               <Route element={<EmployeesLayout />}>
                 <Route path="/employees" element={<Employees />} />
                 <Route path="/employees/new" element={<EmployeeNew />} />
+                <Route path="/employees/:id/edit" element={<EmployeeEdit />} />
                 <Route path="/employees/:id" element={<EmployeeProfile />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

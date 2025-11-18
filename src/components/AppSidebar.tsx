@@ -15,7 +15,6 @@ import {
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Employees', url: '/employees', icon: Users },
-  { title: 'Teams', url: '/teams', icon: UsersRound },
 ];
 
 export function AppSidebar() {

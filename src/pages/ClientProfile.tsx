@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ClientNotesSection } from '@/components/ClientNotesSection';
+import { ClientJobsSection } from '@/components/ClientJobsSection';
 import {
   ArrowLeft,
   Edit,
@@ -32,7 +33,7 @@ import { toast } from '@/hooks/use-toast';
 export default function ClientProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getClientById, deleteContact, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote } = useClients();
+  const { getClientById, deleteContact, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote, addJob, updateJob, deleteJob, addApplicant, updateApplicant, deleteApplicant } = useClients();
   const { getEmployeeById } = useEmployees();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -325,15 +326,16 @@ export default function ClientProfile() {
 
         {/* Jobs Tab */}
         <TabsContent value="jobs" className="space-y-4">
-          <Card className="p-6">
-            <div className="text-center py-8">
-              <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Job management coming soon</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {client.activeOpenings} active openings, {client.totalOpenings} total
-              </p>
-            </div>
-          </Card>
+          <ClientJobsSection
+            jobs={client.jobs}
+            clientId={client.id}
+            onAddJob={(job) => addJob(client.id, job)}
+            onUpdateJob={(jobId, updates) => updateJob(client.id, jobId, updates)}
+            onDeleteJob={(jobId) => deleteJob(client.id, jobId)}
+            onAddApplicant={(jobId, applicant) => addApplicant(client.id, jobId, applicant)}
+            onUpdateApplicant={(jobId, applicantId, updates) => updateApplicant(client.id, jobId, applicantId, updates)}
+            onDeleteApplicant={(jobId, applicantId) => deleteApplicant(client.id, jobId, applicantId)}
+          />
         </TabsContent>
 
         {/* Documents Tab */}

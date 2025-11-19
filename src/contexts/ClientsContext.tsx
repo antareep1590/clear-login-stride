@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Client, ClientContact, ClientDocument, CommissionRule, ClientFeedback, ClientNote } from '@/types/client';
+import { Client, ClientContact, ClientDocument, CommissionRule, ClientFeedback, ClientNote, ClientJob, JobApplicant } from '@/types/client';
 
 interface ClientsContextType {
   clients: Client[];
@@ -25,6 +25,12 @@ interface ClientsContextType {
   updateNote: (clientId: string, noteId: string, updates: Partial<ClientNote>) => void;
   deleteNote: (clientId: string, noteId: string) => void;
   pinNote: (clientId: string, noteId: string, isPinned: boolean) => void;
+  addJob: (clientId: string, job: Omit<ClientJob, 'id' | 'postedDate' | 'applicants'>) => void;
+  updateJob: (clientId: string, jobId: string, updates: Partial<ClientJob>) => void;
+  deleteJob: (clientId: string, jobId: string) => void;
+  addApplicant: (clientId: string, jobId: string, applicant: Omit<JobApplicant, 'id' | 'appliedDate'>) => void;
+  updateApplicant: (clientId: string, jobId: string, applicantId: string, updates: Partial<JobApplicant>) => void;
+  deleteApplicant: (clientId: string, jobId: string, applicantId: string) => void;
 }
 
 const ClientsContext = createContext<ClientsContextType | undefined>(undefined);
@@ -84,6 +90,58 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 12,
       totalOpenings: 45,
+      jobs: [
+        {
+          id: '1',
+          title: 'Senior Software Engineer',
+          description: 'We are looking for an experienced software engineer to join our growing team.',
+          department: 'Engineering',
+          location: 'San Francisco, CA',
+          jobType: 'full-time',
+          status: 'open',
+          priority: 'high',
+          salaryRange: { min: 120000, max: 180000, currency: 'USD' },
+          requiredSkills: ['React', 'TypeScript', 'Node.js', 'AWS'],
+          postedDate: '2024-01-10',
+          postedBy: 'Admin',
+          closingDate: '2024-03-10',
+          openings: 2,
+          applicants: [
+            {
+              id: '1',
+              name: 'John Doe',
+              email: 'john.doe@email.com',
+              phone: '+1-555-0201',
+              appliedDate: '2024-01-12',
+              status: 'interviewing',
+              notes: 'Strong technical background'
+            },
+            {
+              id: '2',
+              name: 'Jane Smith',
+              email: 'jane.smith@email.com',
+              appliedDate: '2024-01-15',
+              status: 'screening'
+            }
+          ]
+        },
+        {
+          id: '2',
+          title: 'Product Manager',
+          description: 'Looking for a product manager to lead our product strategy.',
+          department: 'Product',
+          location: 'Remote',
+          jobType: 'full-time',
+          status: 'open',
+          priority: 'urgent',
+          salaryRange: { min: 130000, max: 160000, currency: 'USD' },
+          requiredSkills: ['Product Strategy', 'Agile', 'Analytics'],
+          postedDate: '2024-01-05',
+          postedBy: 'Admin',
+          openings: 1,
+          applicants: []
+        }
+      ],
       documents: [
         {
           id: '1',
@@ -197,6 +255,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 8,
       totalOpenings: 20,
+      jobs: [],
       documents: [
         {
           id: '3',
@@ -263,6 +322,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 15,
       totalOpenings: 30,
+      jobs: [],
       documents: [
         {
           id: '4',
@@ -363,6 +423,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 25,
       totalOpenings: 50,
+      jobs: [],
       documents: [],
       complianceFields: {},
       commissionRules: [
@@ -415,6 +476,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 0,
       totalOpenings: 0,
+      jobs: [],
       documents: [
         {
           id: '6',
@@ -480,6 +542,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 0,
       totalOpenings: 5,
+      jobs: [],
       documents: [],
       complianceFields: {},
       commissionRules: [],
@@ -543,6 +606,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 5,
       totalOpenings: 8,
+      jobs: [],
       documents: [
         {
           id: '7',
@@ -613,6 +677,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 18,
       totalOpenings: 35,
+      jobs: [],
       documents: [
         {
           id: '8',
@@ -675,6 +740,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 0,
       totalOpenings: 0,
+      jobs: [],
       documents: [
         {
           id: '9',
@@ -740,6 +806,7 @@ const generateMockClients = (): Client[] => {
       ],
       activeOpenings: 0,
       totalOpenings: 10,
+      jobs: [],
       documents: [],
       complianceFields: {},
       commissionRules: [],
@@ -985,6 +1052,105 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  // Job Management
+  const addJob = (clientId: string, job: Omit<ClientJob, 'id' | 'postedDate' | 'applicants'>) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    const newJob: ClientJob = {
+      ...job,
+      id: Date.now().toString(),
+      postedDate: new Date().toISOString().split('T')[0],
+      applicants: [],
+    };
+
+    updateClient(clientId, {
+      jobs: [...client.jobs, newJob],
+      activeOpenings: client.jobs.filter(j => j.status === 'open').length + 1,
+      totalOpenings: client.jobs.length + 1,
+    });
+  };
+
+  const updateJob = (clientId: string, jobId: string, updates: Partial<ClientJob>) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    const updatedJobs = client.jobs.map(job =>
+      job.id === jobId ? { ...job, ...updates } : job
+    );
+
+    updateClient(clientId, {
+      jobs: updatedJobs,
+      activeOpenings: updatedJobs.filter(j => j.status === 'open').length,
+    });
+  };
+
+  const deleteJob = (clientId: string, jobId: string) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    const filteredJobs = client.jobs.filter(job => job.id !== jobId);
+
+    updateClient(clientId, {
+      jobs: filteredJobs,
+      activeOpenings: filteredJobs.filter(j => j.status === 'open').length,
+      totalOpenings: filteredJobs.length,
+    });
+  };
+
+  const addApplicant = (clientId: string, jobId: string, applicant: Omit<JobApplicant, 'id' | 'appliedDate'>) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    const newApplicant: JobApplicant = {
+      ...applicant,
+      id: Date.now().toString(),
+      appliedDate: new Date().toISOString().split('T')[0],
+    };
+
+    const updatedJobs = client.jobs.map(job =>
+      job.id === jobId
+        ? { ...job, applicants: [...job.applicants, newApplicant] }
+        : job
+    );
+
+    updateClient(clientId, { jobs: updatedJobs });
+  };
+
+  const updateApplicant = (clientId: string, jobId: string, applicantId: string, updates: Partial<JobApplicant>) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    const updatedJobs = client.jobs.map(job =>
+      job.id === jobId
+        ? {
+            ...job,
+            applicants: job.applicants.map(applicant =>
+              applicant.id === applicantId ? { ...applicant, ...updates } : applicant
+            ),
+          }
+        : job
+    );
+
+    updateClient(clientId, { jobs: updatedJobs });
+  };
+
+  const deleteApplicant = (clientId: string, jobId: string, applicantId: string) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    const updatedJobs = client.jobs.map(job =>
+      job.id === jobId
+        ? {
+            ...job,
+            applicants: job.applicants.filter(applicant => applicant.id !== applicantId),
+          }
+        : job
+    );
+
+    updateClient(clientId, { jobs: updatedJobs });
+  };
+
   return (
     <ClientsContext.Provider
       value={{
@@ -1011,6 +1177,12 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
         updateNote,
         deleteNote,
         pinNote,
+        addJob,
+        updateJob,
+        deleteJob,
+        addApplicant,
+        updateApplicant,
+        deleteApplicant,
       }}
     >
       {children}

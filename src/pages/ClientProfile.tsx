@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ClientNotesSection } from '@/components/ClientNotesSection';
 import { ClientJobsSection } from '@/components/ClientJobsSection';
+import { ClientDocumentsSection } from '@/components/ClientDocumentsSection';
 import {
   ArrowLeft,
   Edit,
@@ -33,7 +34,7 @@ import { toast } from '@/hooks/use-toast';
 export default function ClientProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getClientById, deleteContact, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote, addJob, updateJob, deleteJob, addApplicant, updateApplicant, deleteApplicant } = useClients();
+  const { getClientById, deleteContact, addDocument, updateDocument, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote, addJob, updateJob, deleteJob, addApplicant, updateApplicant, deleteApplicant } = useClients();
   const { getEmployeeById } = useEmployees();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -340,59 +341,12 @@ export default function ClientProfile() {
 
         {/* Documents Tab */}
         <TabsContent value="documents" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-foreground">Documents & Compliance</h3>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Upload Document
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {client.documents.map(doc => {
-              const isExpiringSoon = doc.expiryDate && new Date(doc.expiryDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-              const isExpired = doc.expiryDate && new Date(doc.expiryDate) < new Date();
-              
-              return (
-                <Card key={doc.id} className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <FileText className="h-5 w-5 text-muted-foreground mt-1" />
-                      <div>
-                        <p className="font-medium text-foreground">{doc.name}</p>
-                        <p className="text-sm text-muted-foreground capitalize">{doc.type}</p>
-                        <Badge variant={doc.status === 'signed' ? 'default' : 'secondary'} className="mt-2">
-                          {doc.status}
-                        </Badge>
-                        {isExpired && <Badge variant="destructive" className="ml-2">Expired</Badge>}
-                        {!isExpired && isExpiringSoon && <Badge variant="outline" className="ml-2">Expiring Soon</Badge>}
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          if (confirm('Delete this document?')) {
-                            deleteDocument(client.id, doc.id);
-                            toast({ title: 'Document deleted' });
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="mt-3 text-sm text-muted-foreground">
-                    <p>Uploaded: {new Date(doc.uploadedDate).toLocaleDateString()}</p>
-                    {doc.expiryDate && <p>Expires: {new Date(doc.expiryDate).toLocaleDateString()}</p>}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+          <ClientDocumentsSection
+            documents={client.documents}
+            onAddDocument={(document) => addDocument(client.id, document)}
+            onUpdateDocument={(documentId, updates) => updateDocument(client.id, documentId, updates)}
+            onDeleteDocument={(documentId) => deleteDocument(client.id, documentId)}
+          />
 
           {/* Compliance Fields */}
           {client.complianceFields && (

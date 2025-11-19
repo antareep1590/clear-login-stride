@@ -1,12 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIntegrations } from '@/contexts/IntegrationsContext';
 import { Integration, IntegrationCategory, IntegrationCategoryInfo } from '@/types/integration';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import {
   Accordion,
   AccordionContent,
@@ -173,124 +170,111 @@ const ConnectionHub = () => {
     }
   };
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/auth/login');
+    }
+  }, [isAuthenticated, navigate]);
+
   if (!isAuthenticated) {
-    navigate('/auth/login');
     return null;
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-10 flex h-16 items-center border-b border-border bg-background px-4 md:px-6">
-            <SidebarTrigger className="mr-4" />
-            <h1 className="text-xl font-bold text-foreground">Smoothire</h1>
-            <div className="ml-auto flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">{user?.email}</span>
-              <Button variant="outline" size="sm" onClick={logout}>
-                Logout
-              </Button>
-            </div>
-          </header>
-
-          <main className="flex-1 p-4 md:p-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2">Connection Hub</h2>
-              <p className="text-muted-foreground">
-                Manage all your third-party integrations in one place
-              </p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3 mb-8">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Connected Categories</CardDescription>
-                  <CardTitle className="text-4xl">{summaryStats.connectedCategories}</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Total Integrations</CardDescription>
-                  <CardTitle className="text-4xl">{summaryStats.totalIntegrations}</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Last Sync</CardDescription>
-                  <CardTitle className="text-lg">{summaryStats.lastSync}</CardTitle>
-                </CardHeader>
-              </Card>
-            </div>
-
-            <Accordion type="multiple" className="space-y-4">
-              {categoryInfo.map((category) => {
-                const CategoryIcon = categoryIcons[category.id];
-                const categoryIntegrations = integrations.filter(
-                  (i) => i.category === category.id
-                );
-
-                return (
-                  <AccordionItem
-                    key={category.id}
-                    value={category.id}
-                    className="border rounded-lg bg-card"
-                  >
-                    <AccordionTrigger className="px-6 hover:no-underline">
-                      <div className="flex items-center justify-between w-full pr-4">
-                        <div className="flex items-center gap-3">
-                          <CategoryIcon className="w-5 h-5 text-primary" />
-                          <div className="text-left">
-                            <h3 className="font-semibold text-lg">{category.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {category.description}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          {category.hasErrors && (
-                            <AlertCircle className="w-4 h-4 text-destructive" />
-                          )}
-                          <div className="text-right">
-                            <p className="text-sm font-medium">
-                              {category.connectedCount} / {category.totalAvailable} Connected
-                            </p>
-                            {category.lastSync && (
-                              <p className="text-xs text-muted-foreground">
-                                Last sync: {format(new Date(category.lastSync), 'MMM d, HH:mm')}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-6 pb-6">
-                      {categoryIntegrations.length === 0 ? (
-                        <div className="text-center py-8">
-                          <p className="text-muted-foreground">No integrations available</p>
-                        </div>
-                      ) : (
-                        <div className="grid gap-4">
-                          {categoryIntegrations.map((integration) => (
-                            <IntegrationCard
-                              key={integration.id}
-                              integration={integration}
-                              onConnect={() => handleConnect(integration.id)}
-                              onDisconnect={() => handleDisconnect(integration.id)}
-                              onSync={() => handleSync(integration.id)}
-                              onSettings={() => handleSettings(integration)}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </AccordionContent>
-                  </AccordionItem>
-                );
-              })}
-            </Accordion>
-          </main>
-        </div>
+    <main className="flex-1 p-4 md:p-8">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold mb-2">Connection Hub</h2>
+        <p className="text-muted-foreground">
+          Manage all your third-party integrations in one place
+        </p>
       </div>
+
+      <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Connected Categories</CardDescription>
+            <CardTitle className="text-4xl">{summaryStats.connectedCategories}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Total Integrations</CardDescription>
+            <CardTitle className="text-4xl">{summaryStats.totalIntegrations}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Last Sync</CardDescription>
+            <CardTitle className="text-lg">{summaryStats.lastSync}</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+
+      <Accordion type="multiple" className="space-y-4">
+        {categoryInfo.map((category) => {
+          const CategoryIcon = categoryIcons[category.id];
+          const categoryIntegrations = integrations.filter(
+            (i) => i.category === category.id
+          );
+
+          return (
+            <AccordionItem
+              key={category.id}
+              value={category.id}
+              className="border rounded-lg bg-card"
+            >
+              <AccordionTrigger className="px-6 hover:no-underline">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <div className="flex items-center gap-3">
+                    <CategoryIcon className="w-5 h-5 text-primary" />
+                    <div className="text-left">
+                      <h3 className="font-semibold text-lg">{category.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {category.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {category.hasErrors && (
+                      <AlertCircle className="w-4 h-4 text-destructive" />
+                    )}
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {category.connectedCount} / {category.totalAvailable} Connected
+                      </p>
+                      {category.lastSync && (
+                        <p className="text-xs text-muted-foreground">
+                          Last sync: {format(new Date(category.lastSync), 'MMM d, HH:mm')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                {categoryIntegrations.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No integrations available</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {categoryIntegrations.map((integration) => (
+                      <IntegrationCard
+                        key={integration.id}
+                        integration={integration}
+                        onConnect={() => handleConnect(integration.id)}
+                        onDisconnect={() => handleDisconnect(integration.id)}
+                        onSync={() => handleSync(integration.id)}
+                        onSettings={() => handleSettings(integration)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
 
       <IntegrationSettingsDialog
         integration={selectedIntegration}
@@ -314,7 +298,7 @@ const ConnectionHub = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </SidebarProvider>
+    </main>
   );
 };
 

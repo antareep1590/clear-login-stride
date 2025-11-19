@@ -12,6 +12,9 @@ import { ClientNotesSection } from '@/components/ClientNotesSection';
 import { ClientJobsSection } from '@/components/ClientJobsSection';
 import { ClientDocumentsSection } from '@/components/ClientDocumentsSection';
 import { EditComplianceDialog } from '@/components/EditComplianceDialog';
+import { CommissionRulesSection } from '@/components/CommissionRulesSection';
+import { AddCommissionRuleDialog } from '@/components/AddCommissionRuleDialog';
+import { EditCommissionRuleDialog } from '@/components/EditCommissionRuleDialog';
 import {
   ArrowLeft,
   Edit,
@@ -35,10 +38,13 @@ import { toast } from '@/hooks/use-toast';
 export default function ClientProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getClientById, deleteContact, updateClient, addDocument, updateDocument, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote, addJob, updateJob, deleteJob, addApplicant, updateApplicant, deleteApplicant } = useClients();
+  const { getClientById, deleteContact, updateClient, addDocument, updateDocument, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote, addJob, updateJob, deleteJob, addApplicant, updateApplicant, deleteApplicant, addCommissionRule, updateCommissionRule } = useClients();
   const { getEmployeeById } = useEmployees();
   const [activeTab, setActiveTab] = useState('overview');
   const [showComplianceDialog, setShowComplianceDialog] = useState(false);
+  const [showAddCommissionDialog, setShowAddCommissionDialog] = useState(false);
+  const [showEditCommissionDialog, setShowEditCommissionDialog] = useState(false);
+  const [selectedCommissionRule, setSelectedCommissionRule] = useState<any>(null);
 
   const client = getClientById(id!);
 
@@ -400,46 +406,27 @@ export default function ClientProfile() {
 
         {/* Commission Tab */}
         <TabsContent value="commission" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-foreground">Commission Rules</h3>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Rule
-            </Button>
-          </div>
-          <div className="space-y-4">
-            {client.commissionRules.map(rule => {
-              const isActive = !rule.endDate || new Date(rule.endDate) > new Date();
-              
-              return (
-                <Card key={rule.id} className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <DollarSign className="h-5 w-5 text-muted-foreground mt-1" />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-foreground">{rule.name}</p>
-                          <Badge variant={isActive ? 'default' : 'secondary'}>
-                            {isActive ? 'Active' : 'Expired'}
-                          </Badge>
-                        </div>
-                        <p className="text-2xl font-bold text-foreground mt-2">
-                          {rule.type === 'percentage' ? `${rule.value}%` : `$${rule.value}`}
-                        </p>
-                        {rule.appliesTo && (
-                          <p className="text-sm text-muted-foreground mt-1">Applies to: {rule.appliesTo}</p>
-                        )}
-                        <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-                          <span>Start: {new Date(rule.startDate).toLocaleDateString()}</span>
-                          {rule.endDate && <span>End: {new Date(rule.endDate).toLocaleDateString()}</span>}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+          <CommissionRulesSection
+            rules={client.commissionRules}
+            onAddRule={() => setShowAddCommissionDialog(true)}
+            onEditRule={(rule) => {
+              setSelectedCommissionRule(rule);
+              setShowEditCommissionDialog(true);
+            }}
+          />
+          
+          <AddCommissionRuleDialog
+            open={showAddCommissionDialog}
+            onOpenChange={setShowAddCommissionDialog}
+            onAdd={(rule) => addCommissionRule(client.id, rule)}
+          />
+          
+          <EditCommissionRuleDialog
+            open={showEditCommissionDialog}
+            onOpenChange={setShowEditCommissionDialog}
+            rule={selectedCommissionRule}
+            onUpdate={(ruleId, updates) => updateCommissionRule(client.id, ruleId, updates)}
+          />
         </TabsContent>
 
         {/* Portal Tab */}

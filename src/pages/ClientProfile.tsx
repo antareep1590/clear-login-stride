@@ -15,6 +15,9 @@ import { EditComplianceDialog } from '@/components/EditComplianceDialog';
 import { CommissionRulesSection } from '@/components/CommissionRulesSection';
 import { AddCommissionRuleDialog } from '@/components/AddCommissionRuleDialog';
 import { EditCommissionRuleDialog } from '@/components/EditCommissionRuleDialog';
+import { PortalAccessSection } from '@/components/PortalAccessSection';
+import { EditPortalSettingsDialog } from '@/components/EditPortalSettingsDialog';
+import { ManageContactPortalDialog } from '@/components/ManageContactPortalDialog';
 import {
   ArrowLeft,
   Edit,
@@ -45,6 +48,9 @@ export default function ClientProfile() {
   const [showAddCommissionDialog, setShowAddCommissionDialog] = useState(false);
   const [showEditCommissionDialog, setShowEditCommissionDialog] = useState(false);
   const [selectedCommissionRule, setSelectedCommissionRule] = useState<any>(null);
+  const [showPortalSettingsDialog, setShowPortalSettingsDialog] = useState(false);
+  const [showManageContactPortalDialog, setShowManageContactPortalDialog] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<any>(null);
 
   const client = getClientById(id!);
 
@@ -431,49 +437,30 @@ export default function ClientProfile() {
 
         {/* Portal Tab */}
         <TabsContent value="portal" className="space-y-4">
-          <Card className="p-6">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Portal Access</h3>
-                <p className="text-sm text-muted-foreground">Manage client portal settings and access</p>
-              </div>
-              <Badge variant={client.portalEnabled ? 'default' : 'secondary'}>
-                {client.portalEnabled ? 'Enabled' : 'Disabled'}
-              </Badge>
-            </div>
-
-            {client.portalEnabled && client.portalSettings && (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground mb-2">Enabled Features</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant={client.portalSettings.dashboardAccess ? 'default' : 'secondary'}>
-                        Dashboard Access
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={client.portalSettings.fileAccess ? 'default' : 'secondary'}>
-                        File Access
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={client.portalSettings.jobsVisible.length > 0 ? 'default' : 'secondary'}>
-                        {client.portalSettings.jobsVisible.length} Jobs Visible
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {!client.portalEnabled && (
-              <div className="text-center py-8">
-                <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Portal access is currently disabled</p>
-              </div>
-            )}
-          </Card>
+          <PortalAccessSection
+            client={client}
+            onEditPortalSettings={() => setShowPortalSettingsDialog(true)}
+            onManageContactPortal={(contact) => {
+              setSelectedContact(contact);
+              setShowManageContactPortalDialog(true);
+            }}
+            onTogglePortal={(enabled) => {
+              updateClient(client.id, { 
+                portalEnabled: enabled,
+                portalSettings: enabled ? (client.portalSettings || {
+                  dashboardAccess: false,
+                  fileAccess: false,
+                  jobsVisible: []
+                }) : client.portalSettings
+              });
+              toast({
+                title: enabled ? 'Portal enabled' : 'Portal disabled',
+                description: enabled 
+                  ? 'Client portal has been enabled. Configure settings to grant access.'
+                  : 'Client portal has been disabled.',
+              });
+            }}
+          />
         </TabsContent>
 
         {/* Activity Tab */}
@@ -546,6 +533,26 @@ export default function ClientProfile() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialogs */}
+      <EditPortalSettingsDialog
+        open={showPortalSettingsDialog}
+        onOpenChange={setShowPortalSettingsDialog}
+        client={client}
+        onUpdate={updateClient}
+      />
+      
+      <ManageContactPortalDialog
+        open={showManageContactPortalDialog}
+        onOpenChange={setShowManageContactPortalDialog}
+        contact={selectedContact}
+        onUpdate={(contactId, updates) => {
+          const updatedContacts = client.contacts.map(c =>
+            c.id === contactId ? { ...c, ...updates } : c
+          );
+          updateClient(client.id, { contacts: updatedContacts });
+        }}
+      />
     </div>
   );
 }

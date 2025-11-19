@@ -1057,6 +1057,8 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     const client = getClientById(clientId);
     if (!client) return;
 
+    const existingJobs = client.jobs || [];
+
     const newJob: ClientJob = {
       ...job,
       id: Date.now().toString(),
@@ -1065,9 +1067,9 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     };
 
     updateClient(clientId, {
-      jobs: [...client.jobs, newJob],
-      activeOpenings: client.jobs.filter(j => j.status === 'open').length + 1,
-      totalOpenings: client.jobs.length + 1,
+      jobs: [...existingJobs, newJob],
+      activeOpenings: existingJobs.filter(j => j.status === 'open').length + 1,
+      totalOpenings: existingJobs.length + 1,
     });
   };
 
@@ -1075,7 +1077,9 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     const client = getClientById(clientId);
     if (!client) return;
 
-    const updatedJobs = client.jobs.map(job =>
+    const existingJobs = client.jobs || [];
+
+    const updatedJobs = existingJobs.map(job =>
       job.id === jobId ? { ...job, ...updates } : job
     );
 
@@ -1089,7 +1093,9 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     const client = getClientById(clientId);
     if (!client) return;
 
-    const filteredJobs = client.jobs.filter(job => job.id !== jobId);
+    const existingJobs = client.jobs || [];
+
+    const filteredJobs = existingJobs.filter(job => job.id !== jobId);
 
     updateClient(clientId, {
       jobs: filteredJobs,
@@ -1102,13 +1108,15 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     const client = getClientById(clientId);
     if (!client) return;
 
+    const existingJobs = client.jobs || [];
+
     const newApplicant: JobApplicant = {
       ...applicant,
       id: Date.now().toString(),
       appliedDate: new Date().toISOString().split('T')[0],
     };
 
-    const updatedJobs = client.jobs.map(job =>
+    const updatedJobs = existingJobs.map(job =>
       job.id === jobId
         ? { ...job, applicants: [...job.applicants, newApplicant] }
         : job
@@ -1121,7 +1129,9 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     const client = getClientById(clientId);
     if (!client) return;
 
-    const updatedJobs = client.jobs.map(job =>
+    const existingJobs = client.jobs || [];
+
+    const updatedJobs = existingJobs.map(job =>
       job.id === jobId
         ? {
             ...job,
@@ -1139,7 +1149,9 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     const client = getClientById(clientId);
     if (!client) return;
 
-    const updatedJobs = client.jobs.map(job =>
+    const existingJobs = client.jobs || [];
+
+    const updatedJobs = existingJobs.map(job =>
       job.id === jobId
         ? {
             ...job,

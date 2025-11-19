@@ -15,7 +15,7 @@ interface ClientsContextType {
   addContact: (clientId: string, contact: Omit<ClientContact, 'id'>) => void;
   updateContact: (clientId: string, contactId: string, updates: Partial<ClientContact>) => void;
   deleteContact: (clientId: string, contactId: string) => void;
-  addDocument: (clientId: string, document: Omit<ClientDocument, 'id'>) => void;
+  addDocument: (clientId: string, document: Omit<ClientDocument, 'id' | 'uploadedDate' | 'uploadedBy'>) => void;
   updateDocument: (clientId: string, docId: string, updates: Partial<ClientDocument>) => void;
   deleteDocument: (clientId: string, docId: string) => void;
   addCommissionRule: (clientId: string, rule: Omit<CommissionRule, 'id'>) => void;
@@ -933,13 +933,15 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const addDocument = (clientId: string, documentData: Omit<ClientDocument, 'id'>) => {
+  const addDocument = (clientId: string, documentData: Omit<ClientDocument, 'id' | 'uploadedDate' | 'uploadedBy'>) => {
     const client = getClientById(clientId);
     if (!client) return;
 
     const newDocument: ClientDocument = {
       ...documentData,
       id: String(Date.now()),
+      uploadedDate: new Date().toISOString().split('T')[0],
+      uploadedBy: 'Current User', // In a real app, this would be the current authenticated user
     };
 
     updateClient(clientId, {

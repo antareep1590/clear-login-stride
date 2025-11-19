@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Integration, Candidate, MessageThread } from '@/types/integration';
+import { Integration, Candidate, MessageThread, SeatPermissionLevel } from '@/types/integration';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -37,9 +45,14 @@ import {
   MessageCircle,
   Check,
   X,
+  MoreVertical,
+  Edit,
+  UserX,
+  Shield,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { SeatAssignmentDialog } from './SeatAssignmentDialog';
 
 interface UnipleSocialIntegrationProps {
   integration: Integration;
@@ -50,6 +63,8 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [editingSeat, setEditingSeat] = useState<string | null>(null);
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectedThread, setSelectedThread] = useState<MessageThread | null>(null);
   const [messageContent, setMessageContent] = useState('');
@@ -63,6 +78,73 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
     });
     setShowPurchaseModal(false);
   };
+
+  const handleAssignSeat = (data: {
+    employeeIds: string[];
+    permissionLevel: SeatPermissionLevel;
+    accessibleTags: string[];
+    notes: string;
+  }) => {
+    toast({
+      title: editingSeat ? 'Seat Updated' : 'Seat Assigned',
+      description: editingSeat
+        ? 'Seat permissions and access have been updated'
+        : `Seat(s) assigned to ${data.employeeIds.length} employee(s) with ${data.permissionLevel} permission`,
+    });
+    setEditingSeat(null);
+  };
+
+  const handleEditSeat = (seatId: string) => {
+    setEditingSeat(seatId);
+    setShowAssignmentModal(true);
+  };
+
+  const handleRevokeSeat = (seatId: string, employeeName: string) => {
+    toast({
+      title: 'Seat Revoked',
+      description: `Access revoked for ${employeeName}`,
+      variant: 'destructive',
+    });
+  };
+
+  const handleOpenAssignmentModal = () => {
+    setEditingSeat(null);
+    setShowAssignmentModal(true);
+  };
+
+  const getPermissionLabel = (level?: SeatPermissionLevel) => {
+    switch (level) {
+      case 'view_only':
+        return 'View Only';
+      case 'send_message':
+        return 'Send Message';
+      case 'manage_openings':
+        return 'Manage Openings';
+      case 'admin':
+        return 'Admin';
+      default:
+        return 'Send Message';
+    }
+  };
+
+  const getPermissionColor = (level?: SeatPermissionLevel) => {
+    switch (level) {
+      case 'view_only':
+        return 'secondary';
+      case 'send_message':
+        return 'default';
+      case 'manage_openings':
+        return 'outline';
+      case 'admin':
+        return 'destructive';
+      default:
+        return 'default';
+    }
+  };
+
+  const editingSeatData = editingSeat
+    ? integration.seatAccess?.find((s) => s.id === editingSeat)
+    : undefined;
 
   const handleSendMessage = () => {
     if (!messageContent.trim()) {
@@ -118,10 +200,21 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
               <Users className="w-5 h-5 text-primary" />
               <CardTitle>Seat & Access Management</CardTitle>
             </div>
-            <Button onClick={() => setShowPurchaseModal(true)} variant="outline" size="sm">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Buy More Access
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleOpenAssignmentModal}
+                variant="default"
+                size="sm"
+                disabled={(integration.seatsAvailable || 0) === 0}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Assign Seat
+              </Button>
+              <Button onClick={() => setShowPurchaseModal(true)} variant="outline" size="sm">
+                <CreditCard className="w-4 h-4 mr-2" />
+                Buy More Access
+              </Button>
+            </div>
           </div>
           <CardDescription>
             {integration.seatsAssigned} of {integration.seatsTotal} seats assigned •{' '}
@@ -133,9 +226,11 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
             <TableHeader>
               <TableRow>
                 <TableHead>Employee</TableHead>
+                <TableHead>Permission</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Tags</TableHead>
+                <TableHead>Access Tags</TableHead>
                 <TableHead>Assigned Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -151,6 +246,12 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
                     </div>
                   </TableCell>
                   <TableCell>
+                    <Badge variant={getPermissionColor(seat.permissionLevel)}>
+                      <Shield className="w-3 h-3 mr-1" />
+                      {getPermissionLabel(seat.permissionLevel)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     <Badge
                       variant={
                         seat.status === 'active'
@@ -164,17 +265,50 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-1 flex-wrap">
-                      {seat.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          <Tag className="w-3 h-3 mr-1" />
-                          {tag}
+                    <div className="flex gap-1 flex-wrap max-w-xs">
+                      {seat.accessibleTags && seat.accessibleTags.length > 0 ? (
+                        seat.accessibleTags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            <Tag className="w-3 h-3 mr-1" />
+                            {tag}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-xs text-muted-foreground">All access</span>
+                      )}
+                      {seat.accessibleTags && seat.accessibleTags.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{seat.accessibleTags.length - 3}
                         </Badge>
-                      ))}
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {format(new Date(seat.assignedDate), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleEditSeat(seat.id)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Permissions
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleRevokeSeat(seat.id, seat.employeeName)}
+                          className="text-destructive"
+                        >
+                          <UserX className="w-4 h-4 mr-2" />
+                          Revoke Access
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
@@ -458,6 +592,25 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Seat Assignment Dialog */}
+      <SeatAssignmentDialog
+        open={showAssignmentModal}
+        onOpenChange={setShowAssignmentModal}
+        onAssign={handleAssignSeat}
+        editMode={!!editingSeat}
+        existingSeat={
+          editingSeatData
+            ? {
+                employeeId: editingSeatData.employeeId,
+                employeeName: editingSeatData.employeeName,
+                permissionLevel: editingSeatData.permissionLevel || 'send_message',
+                accessibleTags: editingSeatData.accessibleTags || [],
+                notes: editingSeatData.notes,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 };

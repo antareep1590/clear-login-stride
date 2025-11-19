@@ -15,6 +15,8 @@ export interface IntegrationActivity {
   status: 'queued' | 'sent' | 'failed' | 'completed';
 }
 
+export type SeatPermissionLevel = 'view_only' | 'send_message' | 'manage_openings' | 'admin';
+
 export interface SeatAccess {
   id: string;
   employeeId: string;
@@ -23,6 +25,9 @@ export interface SeatAccess {
   status: 'active' | 'inactive' | 'revoked';
   assignedDate: string;
   tags: string[];
+  permissionLevel?: SeatPermissionLevel;
+  accessibleTags?: string[]; // Tags this seat can access
+  notes?: string;
 }
 
 export interface Candidate {

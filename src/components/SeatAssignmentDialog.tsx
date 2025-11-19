@@ -131,43 +131,46 @@ export const SeatAssignmentDialog = ({
     existingSeat?.accessibleTags || []
   );
   const [notes, setNotes] = useState(existingSeat?.notes || '');
-  const [employeeSearchOpen, setEmployeeSearchOpen] = useState(false);
-  const [tagSearchOpen, setTagSearchOpen] = useState(false);
-  const [newTag, setNewTag] = useState('');
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [tagSearch, setTagSearch] = useState('');
+  const [showEmployeeList, setShowEmployeeList] = useState(false);
+  const [showTagList, setShowTagList] = useState(false);
 
   const handleEmployeeSelect = (employeeId: string) => {
     if (editMode) {
+      // In edit mode, only allow one employee
       setSelectedEmployees([employeeId]);
     } else {
-      setSelectedEmployees((prev) =>
+      // In add mode, allow multiple
+      setSelectedEmployees(prev =>
         prev.includes(employeeId)
-          ? prev.filter((id) => id !== employeeId)
+          ? prev.filter(id => id !== employeeId)
           : [...prev, employeeId]
       );
     }
   };
 
   const handleTagSelect = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
   };
 
   const handleAddNewTag = () => {
-    if (newTag.trim() && !selectedTags.includes(newTag.trim())) {
-      setSelectedTags((prev) => [...prev, newTag.trim()]);
-      setNewTag('');
+    if (tagSearch.trim() && !availableTags.includes(tagSearch.trim())) {
+      handleTagSelect(tagSearch.trim());
+      setTagSearch('');
     }
   };
 
   const handleRemoveTag = (tag: string) => {
-    setSelectedTags((prev) => prev.filter((t) => t !== tag));
+    setSelectedTags(prev => prev.filter(t => t !== tag));
   };
 
   const handleSubmit = () => {
     if (selectedEmployees.length === 0) {
       toast({
-        title: 'No Employees Selected',
+        title: 'Employee Required',
         description: 'Please select at least one employee',
         variant: 'destructive',
       });
@@ -182,325 +185,364 @@ export const SeatAssignmentDialog = ({
     });
 
     // Reset form
-    setSelectedEmployees([]);
-    setPermissionLevel('send_message');
-    setSelectedTags([]);
-    setNotes('');
-    onOpenChange(false);
+    if (!editMode) {
+      setSelectedEmployees([]);
+      setPermissionLevel('send_message');
+      setSelectedTags([]);
+      setNotes('');
+    }
   };
 
-  const selectedEmployeeDetails = mockEmployees.filter((emp) =>
+  const selectedEmployeesList = mockEmployees.filter(emp =>
     selectedEmployees.includes(emp.id)
   );
 
-  const currentPermission = permissionLevels.find((p) => p.value === permissionLevel);
+  const filteredEmployees = mockEmployees.filter(
+    emp =>
+      emp.name.toLowerCase().includes(employeeSearch.toLowerCase()) ||
+      emp.email.toLowerCase().includes(employeeSearch.toLowerCase()) ||
+      emp.department.toLowerCase().includes(employeeSearch.toLowerCase())
+  );
+
+  const filteredTags = availableTags.filter(tag =>
+    tag.toLowerCase().includes(tagSearch.toLowerCase())
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh]">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserCog className="w-5 h-5 text-primary" />
-            {editMode ? 'Edit Seat Assignment' : 'Assign Uniple Seat'}
+            <UserCog className="w-5 h-5" />
+            {editMode ? 'Edit Seat Permissions' : 'Assign Uniple Seat'}
           </DialogTitle>
           <DialogDescription>
             {editMode
-              ? 'Update seat permissions and access restrictions'
-              : 'Assign this seat to employees and configure their permissions'}
+              ? 'Update permissions and access for this seat assignment'
+              : 'Assign this Uniple seat to employees and configure their permissions'}
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-200px)] pr-4">
-          <div className="space-y-6">
-            {/* Employee Selection */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                {editMode ? 'Assigned Employee' : 'Select Employees'}
+        <div className="space-y-6 py-4">
+          {/* Employee Selection */}
+          <div className="space-y-3">
+            <div>
+              <Label className="text-base font-semibold">
+                {editMode ? 'Assigned Employee' : 'Select Employee(s)'}
               </Label>
-              <Popover open={employeeSearchOpen} onOpenChange={setEmployeeSearchOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between"
+              <p className="text-sm text-muted-foreground mt-1">
+                {editMode
+                  ? 'Currently assigned to this employee'
+                  : 'Search and select one or multiple employees to assign this seat'}
+              </p>
+            </div>
+
+            {/* Selected Employees */}
+            {selectedEmployeesList.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg">
+                {selectedEmployeesList.map(emp => (
+                  <Badge
+                    key={emp.id}
+                    variant="secondary"
+                    className="flex items-center gap-2 pl-1 pr-2 py-1"
                   >
-                    <span className="truncate">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={emp.avatar} />
+                      <AvatarFallback className="text-xs">
+                        {emp.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span>{emp.name}</span>
+                    {!editMode && (
+                      <button
+                        onClick={() => handleEmployeeSelect(emp.id)}
+                        className="ml-1 hover:bg-muted rounded-full p-0.5"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Employee Search/Select */}
+            {!editMode && (
+              <Popover open={showEmployeeList} onOpenChange={setShowEmployeeList}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    <span className="flex items-center gap-2">
+                      <Users className="w-4 h-4" />
                       {selectedEmployees.length === 0
-                        ? 'Search employees...'
-                        : `${selectedEmployees.length} employee(s) selected`}
+                        ? 'Select employees...'
+                        : `${selectedEmployees.length} selected`}
                     </span>
-                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronDown className="w-4 h-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0" align="start">
                   <Command>
-                    <CommandInput placeholder="Search by name or email..." />
+                    <CommandInput
+                      placeholder="Search employees..."
+                      value={employeeSearch}
+                      onValueChange={setEmployeeSearch}
+                    />
                     <CommandList>
                       <CommandEmpty>No employees found.</CommandEmpty>
                       <CommandGroup>
-                        {mockEmployees.map((employee) => (
-                          <CommandItem
-                            key={employee.id}
-                            onSelect={() => handleEmployeeSelect(employee.id)}
-                          >
-                            <div className="flex items-center gap-2 flex-1">
-                              <Check
+                        <ScrollArea className="h-[200px]">
+                          {filteredEmployees.map(emp => (
+                            <CommandItem
+                              key={emp.id}
+                              onSelect={() => handleEmployeeSelect(emp.id)}
+                              className="flex items-center gap-3"
+                            >
+                              <div
                                 className={cn(
-                                  'w-4 h-4',
-                                  selectedEmployees.includes(employee.id)
-                                    ? 'opacity-100'
-                                    : 'opacity-0'
+                                  'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                                  selectedEmployees.includes(emp.id)
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'opacity-50'
                                 )}
-                              />
-                              <Avatar className="w-6 h-6">
-                                <AvatarImage src={employee.avatar} />
-                                <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="font-medium">{employee.name}</div>
-                                <div className="text-xs text-muted-foreground">
-                                  {employee.email} • {employee.department}
-                                </div>
+                              >
+                                {selectedEmployees.includes(emp.id) && (
+                                  <Check className="h-3 w-3" />
+                                )}
                               </div>
-                            </div>
-                          </CommandItem>
-                        ))}
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={emp.avatar} />
+                                <AvatarFallback>
+                                  {emp.name.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{emp.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {emp.email} • {emp.department}
+                                </span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </ScrollArea>
                       </CommandGroup>
                     </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
-
-              {/* Selected Employees Display */}
-              {selectedEmployeeDetails.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedEmployeeDetails.map((emp) => (
-                    <Badge key={emp.id} variant="secondary" className="pl-2 pr-1 py-1">
-                      <div className="flex items-center gap-1">
-                        <Avatar className="w-4 h-4">
-                          <AvatarImage src={emp.avatar} />
-                          <AvatarFallback className="text-[8px]">
-                            {emp.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs">{emp.name}</span>
-                        {!editMode && (
-                          <X
-                            className="w-3 h-3 ml-1 cursor-pointer hover:text-destructive"
-                            onClick={() => handleEmployeeSelect(emp.id)}
-                          />
-                        )}
-                      </div>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <Separator />
-
-            {/* Permission Level */}
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Permission Level
-              </Label>
-              <RadioGroup value={permissionLevel} onValueChange={(v) => setPermissionLevel(v as SeatPermissionLevel)}>
-                <div className="space-y-2">
-                  {permissionLevels.map((level) => {
-                    const Icon = level.icon;
-                    return (
-                      <div
-                        key={level.value}
-                        className={cn(
-                          'flex items-start space-x-3 rounded-lg border p-3 cursor-pointer transition-colors',
-                          permissionLevel === level.value
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-primary/50'
-                        )}
-                        onClick={() => setPermissionLevel(level.value)}
-                      >
-                        <RadioGroupItem value={level.value} id={level.value} />
-                        <div className="flex-1 space-y-1">
-                          <Label
-                            htmlFor={level.value}
-                            className="flex items-center gap-2 cursor-pointer font-medium"
-                          >
-                            <Icon className="w-4 h-4 text-primary" />
-                            {level.label}
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            {level.description}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </RadioGroup>
-            </div>
-
-            <Separator />
-
-            {/* Tag-Based Access Restrictions */}
-            <div className="space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <Label className="flex items-center gap-2">
-                    <Tag className="w-4 h-4" />
-                    Access Restrictions (Tags)
-                  </Label>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Select tags to restrict access to specific candidates and openings
-                  </p>
-                </div>
-              </div>
-
-              {/* Tag Selection */}
-              <div className="flex gap-2">
-                <Popover open={tagSearchOpen} onOpenChange={setTagSearchOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full justify-between">
-                      <span className="flex items-center gap-2">
-                        <Tag className="w-3 h-3" />
-                        Select tags
-                      </span>
-                      <ChevronDown className="h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-2" align="start">
-                    <ScrollArea className="h-48">
-                      <div className="space-y-1">
-                        {availableTags.map((tag) => (
-                          <div
-                            key={tag}
-                            className={cn(
-                              'flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer hover:bg-accent',
-                              selectedTags.includes(tag) && 'bg-accent'
-                            )}
-                            onClick={() => handleTagSelect(tag)}
-                          >
-                            <Check
-                              className={cn(
-                                'w-4 h-4',
-                                selectedTags.includes(tag) ? 'opacity-100' : 'opacity-0'
-                              )}
-                            />
-                            <span className="text-sm">{tag}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Custom Tag Input */}
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add custom tag..."
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddNewTag();
-                    }
-                  }}
-                />
-                <Button onClick={handleAddNewTag} variant="outline" size="sm">
-                  Add
-                </Button>
-              </div>
-
-              {/* Selected Tags Display */}
-              {selectedTags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {selectedTags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="pr-1">
-                      <Tag className="w-3 h-3 mr-1" />
-                      {tag}
-                      <X
-                        className="w-3 h-3 ml-1 cursor-pointer hover:text-destructive"
-                        onClick={() => handleRemoveTag(tag)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              {selectedTags.length === 0 && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-                  <Info className="w-4 h-4" />
-                  No restrictions - employee can access all candidates and openings
-                </div>
-              )}
-            </div>
-
-            <Separator />
-
-            {/* Notes */}
-            <div className="space-y-2">
-              <Label>Notes (Optional)</Label>
-              <Textarea
-                placeholder="Add any notes about this assignment..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            {/* Access Preview Panel */}
-            {(selectedEmployees.length > 0 || currentPermission) && (
-              <>
-                <Separator />
-                <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <Info className="w-4 h-4" />
-                    Access Summary
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Employees: </span>
-                      <span className="font-medium">
-                        {selectedEmployees.length} selected
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Permission: </span>
-                      <span className="font-medium">{currentPermission?.label}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Access Scope: </span>
-                      <span className="font-medium">
-                        {selectedTags.length === 0
-                          ? 'All candidates and openings'
-                          : `Restricted to ${selectedTags.length} tag(s)`}
-                      </span>
-                    </div>
-                    {selectedTags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {selectedTags.map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </>
             )}
           </div>
-        </ScrollArea>
+
+          <Separator />
+
+          {/* Permission Level */}
+          <div className="space-y-3">
+            <div>
+              <Label className="text-base font-semibold">Permission Level</Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                Set what this employee can do with this Uniple seat
+              </p>
+            </div>
+
+            <RadioGroup value={permissionLevel} onValueChange={(v) => setPermissionLevel(v as SeatPermissionLevel)}>
+              <div className="space-y-2">
+                {permissionLevels.map(level => {
+                  const Icon = level.icon;
+                  return (
+                    <div
+                      key={level.value}
+                      className={cn(
+                        'flex items-start space-x-3 space-y-0 rounded-lg border p-4 cursor-pointer transition-colors',
+                        permissionLevel === level.value
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:bg-muted/50'
+                      )}
+                      onClick={() => setPermissionLevel(level.value)}
+                    >
+                      <RadioGroupItem value={level.value} id={level.value} />
+                      <div className="flex-1 space-y-1">
+                        <Label
+                          htmlFor={level.value}
+                          className="flex items-center gap-2 cursor-pointer font-medium"
+                        >
+                          <Icon className="w-4 h-4" />
+                          {level.label}
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          {level.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </RadioGroup>
+          </div>
+
+          <Separator />
+
+          {/* Tag-Based Access */}
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <Label className="flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  Tag-Based Access
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select tags to grant access to specific candidates and openings. Employees can only interact with candidates/openings that have these tags.
+                </p>
+              </div>
+            </div>
+
+            {/* Tag Selection */}
+            <div className="flex gap-2">
+              <Popover open={showTagList} onOpenChange={setShowTagList}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="flex-1 justify-between">
+                    <span className="flex items-center gap-2">
+                      <Tag className="w-4 h-4" />
+                      Add tags...
+                    </span>
+                    <ChevronDown className="w-4 h-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search or add new tag..."
+                      value={tagSearch}
+                      onValueChange={setTagSearch}
+                    />
+                    <CommandList>
+                      {filteredTags.length === 0 && tagSearch && (
+                        <CommandEmpty>
+                          <Button
+                            variant="ghost"
+                            className="w-full"
+                            onClick={handleAddNewTag}
+                          >
+                            Create "{tagSearch}"
+                          </Button>
+                        </CommandEmpty>
+                      )}
+                      <CommandGroup>
+                        <ScrollArea className="h-[150px]">
+                          {filteredTags.map(tag => (
+                            <CommandItem
+                              key={tag}
+                              onSelect={() => handleTagSelect(tag)}
+                              className="flex items-center gap-2"
+                            >
+                              <div
+                                className={cn(
+                                  'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                                  selectedTags.includes(tag)
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'opacity-50'
+                                )}
+                              >
+                                {selectedTags.includes(tag) && (
+                                  <Check className="h-3 w-3" />
+                                )}
+                              </div>
+                              {tag}
+                            </CommandItem>
+                          ))}
+                        </ScrollArea>
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Selected Tags */}
+            {selectedTags.length > 0 ? (
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg">
+                {selectedTags.map(tag => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {tag}
+                    <button
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-1 hover:bg-muted rounded-full p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-foreground">
+                <Info className="h-4 w-4 mt-0.5 flex-shrink-0 text-amber-500" />
+                <span>No tags selected - employee will have limited or no access to candidates and openings. Add tags to grant access.</span>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Optional Notes */}
+          <div className="space-y-2">
+            <Label>Notes (Optional)</Label>
+            <Textarea
+              placeholder="Add any additional notes about this assignment..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          {/* Access Preview Panel */}
+          <div className="p-4 bg-muted/30 rounded-lg border border-border space-y-3">
+            <div className="flex items-center gap-2 font-semibold">
+              <Shield className="w-4 h-4" />
+              Assignment Summary
+            </div>
+            <Separator />
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium">Access Scope:</span>
+                <span className="text-muted-foreground">
+                  {selectedTags.length === 0 
+                    ? "No tag-based access granted" 
+                    : `Can access candidates/openings tagged with ${selectedTags.length} tag(s)`}
+                </span>
+              </div>
+              {selectedTags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {selectedTags.map(tag => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium">Permission:</span>
+                <Badge variant="secondary">
+                  {permissionLevels.find(p => p.value === permissionLevel)?.label}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium">Employees:</span>
+                <span className="text-muted-foreground">
+                  {selectedEmployees.length} assigned
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit}>
-            {editMode ? 'Update Assignment' : 'Assign Seat'}
+            {editMode ? 'Update Permissions' : 'Assign Seat'}
           </Button>
         </DialogFooter>
       </DialogContent>

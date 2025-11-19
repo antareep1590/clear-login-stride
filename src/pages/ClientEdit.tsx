@@ -114,14 +114,6 @@ export default function ClientEdit() {
               </div>
             </div>
 
-            <div>
-              <Label>Notes</Label>
-              <Textarea
-                value={formData.notes || ''}
-                onChange={(e) => updateField('notes', e.target.value)}
-                rows={4}
-              />
-            </div>
           </div>
 
           <div className="flex justify-end gap-2">

@@ -175,16 +175,6 @@ export default function ClientNew() {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes || ''}
-                onChange={(e) => updateField('notes', e.target.value)}
-                placeholder="Add notes about this client..."
-                rows={4}
-              />
-            </div>
           </div>
 
           <div className="flex justify-end gap-2">

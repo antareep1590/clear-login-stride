@@ -79,6 +79,45 @@ export interface ClientNote {
   category?: string;
 }
 
+export type JobStatus = 'open' | 'on-hold' | 'filled' | 'cancelled' | 'draft';
+export type JobPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type JobType = 'full-time' | 'part-time' | 'contract' | 'temporary';
+
+export interface JobApplicant {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  appliedDate: string;
+  status: 'new' | 'screening' | 'interviewing' | 'offered' | 'rejected' | 'hired';
+  resumeUrl?: string;
+  notes?: string;
+}
+
+export interface ClientJob {
+  id: string;
+  title: string;
+  description: string;
+  department: string;
+  location: string;
+  jobType: JobType;
+  status: JobStatus;
+  priority: JobPriority;
+  salaryRange?: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+  requiredSkills: string[];
+  postedDate: string;
+  postedBy: string;
+  closingDate?: string;
+  filledDate?: string;
+  applicants: JobApplicant[];
+  openings: number;
+  notes?: string;
+}
+
 export interface Client {
   id: string;
   // Basic Info
@@ -106,6 +145,7 @@ export interface Client {
   regions: ClientLocation[];
   
   // Jobs & Openings
+  jobs: ClientJob[];
   activeOpenings: number;
   totalOpenings: number;
   

@@ -193,30 +193,6 @@ const mockIntegrations: Integration[] = [
     lastSync: '2024-01-10T14:20:00Z',
   },
   {
-    id: '4',
-    name: 'LinkedIn',
-    category: 'social_integration',
-    status: 'connected',
-    lastSync: '2024-01-15T09:45:00Z',
-    owner: 'admin@company.com',
-    stats: [
-      { label: 'Posts Published', value: 45 },
-      { label: 'Connections', value: 2340 },
-    ],
-    settings: {
-      syncFrequency: 'daily',
-      notifications: true,
-    },
-  },
-  {
-    id: '5',
-    name: 'Twitter/X',
-    category: 'social_integration',
-    status: 'expired',
-    lastSync: '2024-01-01T12:00:00Z',
-    errorMessage: 'Authorization expired. Please reconnect.',
-  },
-  {
     id: '6',
     name: 'Zapier',
     category: 'automation_tools',

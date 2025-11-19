@@ -95,11 +95,12 @@ export function ClientNotesSection({
           ) : (
             <div className="space-y-4">
               {sortedNotes.map(note => {
+                const content = note.content || '';
                 const isExpanded = expandedNotes.has(note.id);
-                const shouldTruncate = note.content.length > 200;
+                const shouldTruncate = content.length > 200;
                 const displayContent = isExpanded || !shouldTruncate
-                  ? note.content
-                  : note.content.slice(0, 200) + '...';
+                  ? content
+                  : content.slice(0, 200) + '...';
 
                 return (
                   <Card

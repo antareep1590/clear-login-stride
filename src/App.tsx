@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { EmployeesProvider } from "@/contexts/EmployeesContext";
 import { TeamsProvider } from "@/contexts/TeamsContext";
 import { ClientsProvider } from "@/contexts/ClientsContext";
+import { IntegrationsProvider } from "@/contexts/IntegrationsContext";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -26,6 +27,7 @@ import ClientProfile from "./pages/ClientProfile";
 import ClientNew from "./pages/ClientNew";
 import ClientEdit from "./pages/ClientEdit";
 import ClientsPipeline from "./pages/ClientsPipeline";
+import ConnectionHub from "./pages/ConnectionHub";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,10 +38,11 @@ const App = () => (
       <EmployeesProvider>
         <TeamsProvider>
           <ClientsProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+            <IntegrationsProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth/login" element={<Login />} />
@@ -60,12 +63,14 @@ const App = () => (
                   <Route path="/clients/pipeline" element={<ClientsPipeline />} />
                   <Route path="/clients/:id" element={<ClientProfile />} />
                   <Route path="/clients/:id/edit" element={<ClientEdit />} />
+                  <Route path="/connections" element={<ConnectionHub />} />
                 </Route>
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
+            </IntegrationsProvider>
           </ClientsProvider>
         </TeamsProvider>
       </EmployeesProvider>

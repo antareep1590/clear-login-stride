@@ -15,6 +15,45 @@ export interface IntegrationActivity {
   status: 'queued' | 'sent' | 'failed' | 'completed';
 }
 
+export interface SeatAccess {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  employeeAvatar?: string;
+  status: 'active' | 'inactive' | 'revoked';
+  assignedDate: string;
+  tags: string[];
+}
+
+export interface Candidate {
+  id: string;
+  name: string;
+  avatar?: string;
+  linkedinUrl?: string;
+  whatsappNumber?: string;
+  connectionStatus: 'connected' | 'pending' | 'not_connected';
+  lastContacted?: string;
+  tags: string[];
+  jobApplied?: string;
+}
+
+export interface MessageThread {
+  id: string;
+  candidateId: string;
+  candidateName: string;
+  candidateAvatar?: string;
+  channel: 'linkedin' | 'whatsapp';
+  status: 'read' | 'unread';
+  lastMessage: string;
+  timestamp: string;
+  messages: {
+    id: string;
+    sender: 'employee' | 'candidate';
+    content: string;
+    timestamp: string;
+  }[];
+}
+
 export interface Integration {
   id: string;
   name: string;
@@ -35,6 +74,14 @@ export interface Integration {
     notifications: boolean;
     apiKey?: string;
   };
+  // Seat-based integration fields (for Uniple)
+  seatBased?: boolean;
+  seatsTotal?: number;
+  seatsAssigned?: number;
+  seatsAvailable?: number;
+  seatAccess?: SeatAccess[];
+  candidates?: Candidate[];
+  messageThreads?: MessageThread[];
 }
 
 export interface IntegrationCategoryInfo {

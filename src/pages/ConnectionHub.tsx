@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/accordion';
 import { IntegrationCard } from '@/components/IntegrationCard';
 import { IntegrationSettingsDialog } from '@/components/IntegrationSettingsDialog';
+import { UnipleSocialIntegration } from '@/components/UnipleSocialIntegration';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -259,14 +260,21 @@ const ConnectionHub = () => {
                 ) : (
                   <div className="grid gap-4">
                     {categoryIntegrations.map((integration) => (
-                      <IntegrationCard
-                        key={integration.id}
-                        integration={integration}
-                        onConnect={() => handleConnect(integration.id)}
-                        onDisconnect={() => handleDisconnect(integration.id)}
-                        onSync={() => handleSync(integration.id)}
-                        onSettings={() => handleSettings(integration)}
-                      />
+                      integration.seatBased ? (
+                        <UnipleSocialIntegration
+                          key={integration.id}
+                          integration={integration}
+                        />
+                      ) : (
+                        <IntegrationCard
+                          key={integration.id}
+                          integration={integration}
+                          onConnect={() => handleConnect(integration.id)}
+                          onDisconnect={() => handleDisconnect(integration.id)}
+                          onSync={() => handleSync(integration.id)}
+                          onSettings={() => handleSettings(integration)}
+                        />
+                      )
                     ))}
                   </div>
                 )}

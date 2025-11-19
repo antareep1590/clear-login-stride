@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { ClientNotesSection } from '@/components/ClientNotesSection';
 import { ClientJobsSection } from '@/components/ClientJobsSection';
 import { ClientDocumentsSection } from '@/components/ClientDocumentsSection';
+import { EditComplianceDialog } from '@/components/EditComplianceDialog';
 import {
   ArrowLeft,
   Edit,
@@ -34,9 +35,10 @@ import { toast } from '@/hooks/use-toast';
 export default function ClientProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getClientById, deleteContact, addDocument, updateDocument, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote, addJob, updateJob, deleteJob, addApplicant, updateApplicant, deleteApplicant } = useClients();
+  const { getClientById, deleteContact, updateClient, addDocument, updateDocument, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote, addJob, updateJob, deleteJob, addApplicant, updateApplicant, deleteApplicant } = useClients();
   const { getEmployeeById } = useEmployees();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showComplianceDialog, setShowComplianceDialog] = useState(false);
 
   const client = getClientById(id!);
 
@@ -349,9 +351,19 @@ export default function ClientProfile() {
           />
 
           {/* Compliance Fields */}
-          {client.complianceFields && (
-            <Card className="p-6 mt-6">
-              <h3 className="text-lg font-semibold mb-4 text-foreground">Compliance Status</h3>
+          <Card className="p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Compliance Status</h3>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowComplianceDialog(true)}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            </div>
+            {client.complianceFields ? (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">GDPR Compliant</p>
@@ -372,8 +384,18 @@ export default function ClientProfile() {
                   </div>
                 )}
               </div>
-            </Card>
-          )}
+            ) : (
+              <p className="text-sm text-muted-foreground">No compliance information set</p>
+            )}
+          </Card>
+
+          <EditComplianceDialog
+            open={showComplianceDialog}
+            onOpenChange={setShowComplianceDialog}
+            clientId={client.id}
+            complianceFields={client.complianceFields}
+            onUpdate={(clientId, updates) => updateClient(clientId, updates)}
+          />
         </TabsContent>
 
         {/* Commission Tab */}

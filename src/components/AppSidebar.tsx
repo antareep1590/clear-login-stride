@@ -17,7 +17,7 @@ const navItems = [
   { title: 'Employees', url: '/employees', icon: Users },
   { title: 'Teams', url: '/teams', icon: UsersRound },
   { title: 'Clients', url: '/clients', icon: Building2 },
-  { title: 'Connections', url: '/connections', icon: Plug },
+  { title: 'Connection Hub', url: '/connections', icon: Plug },
 ];
 
 export function AppSidebar() {

@@ -37,6 +37,9 @@ const mockIntegrations: Integration[] = [
         status: 'active',
         assignedDate: new Date(Date.now() - 86400000 * 30).toISOString(),
         tags: ['recruiter', 'tech-team'],
+        permissionLevel: 'send_message',
+        accessibleTags: ['senior-dev', 'react', 'backend-dev'],
+        notes: 'Primary recruiter for tech roles',
       },
       {
         id: 'seat2',
@@ -46,6 +49,9 @@ const mockIntegrations: Integration[] = [
         status: 'active',
         assignedDate: new Date(Date.now() - 86400000 * 20).toISOString(),
         tags: ['recruiter', 'sales-team'],
+        permissionLevel: 'manage_openings',
+        accessibleTags: ['designer', 'ui-ux'],
+        notes: 'Handles design and creative roles',
       },
       {
         id: 'seat3',
@@ -55,6 +61,9 @@ const mockIntegrations: Integration[] = [
         status: 'active',
         assignedDate: new Date(Date.now() - 86400000 * 10).toISOString(),
         tags: ['manager', 'tech-team'],
+        permissionLevel: 'admin',
+        accessibleTags: [],
+        notes: 'Full admin access for all departments',
       },
     ],
     candidates: [

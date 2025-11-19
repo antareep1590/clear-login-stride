@@ -26,7 +26,8 @@ export interface SeatAccess {
   assignedDate: string;
   tags: string[];
   permissionLevel?: SeatPermissionLevel;
-  accessibleTags?: string[]; // Tags this seat can access
+  /** Tags that GRANT access to candidates/openings. Additive model: more tags = more access */
+  accessibleTags?: string[];
   notes?: string;
 }
 

@@ -42,6 +42,9 @@ export function ClientJobsSection({
   onUpdateApplicant,
   onDeleteApplicant,
 }: ClientJobsSectionProps) {
+  // Ensure jobs is always an array
+  const jobsList = jobs || [];
+  
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<ClientJob | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -106,7 +109,7 @@ export function ClientJobsSection({
         <div>
           <h3 className="text-lg font-semibold text-foreground">Job Openings</h3>
           <p className="text-sm text-muted-foreground">
-            {jobs.length} {jobs.length === 1 ? 'opening' : 'openings'} • {jobs.filter(j => j.status === 'open').length} active
+            {jobsList.length} {jobsList.length === 1 ? 'opening' : 'openings'} • {jobsList.filter(j => j.status === 'open').length} active
           </p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
@@ -115,7 +118,7 @@ export function ClientJobsSection({
         </Button>
       </div>
 
-      {jobs.length === 0 ? (
+      {jobsList.length === 0 ? (
         <Card className="p-12 text-center">
           <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">No Job Openings</h3>
@@ -129,7 +132,7 @@ export function ClientJobsSection({
         </Card>
       ) : (
         <div className="grid gap-4">
-          {jobs.map((job) => (
+          {jobsList.map((job) => (
             <Card key={job.id} className="p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 space-y-3">

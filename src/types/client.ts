@@ -67,6 +67,18 @@ export interface ClientFeedback {
   createdDate: string;
 }
 
+export interface ClientNote {
+  id: string;
+  content: string;
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+  updatedAt?: string;
+  isPinned: boolean;
+  tags?: string[];
+  category?: string;
+}
+
 export interface Client {
   id: string;
   // Basic Info
@@ -134,5 +146,5 @@ export interface Client {
   createdBy: string;
   updatedAt: string;
   updatedBy: string;
-  notes?: string;
+  notes: ClientNote[];
 }

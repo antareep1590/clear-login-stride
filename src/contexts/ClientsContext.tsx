@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Client, ClientContact, ClientDocument, CommissionRule, ClientFeedback } from '@/types/client';
+import { Client, ClientContact, ClientDocument, CommissionRule, ClientFeedback, ClientNote } from '@/types/client';
 
 interface ClientsContextType {
   clients: Client[];
@@ -21,6 +21,10 @@ interface ClientsContextType {
   addCommissionRule: (clientId: string, rule: Omit<CommissionRule, 'id'>) => void;
   updateCommissionRule: (clientId: string, ruleId: string, updates: Partial<CommissionRule>) => void;
   addFeedback: (clientId: string, feedback: Omit<ClientFeedback, 'id'>) => void;
+  addNote: (clientId: string, note: Omit<ClientNote, 'id' | 'createdAt'>) => void;
+  updateNote: (clientId: string, noteId: string, updates: Partial<ClientNote>) => void;
+  deleteNote: (clientId: string, noteId: string) => void;
+  pinNote: (clientId: string, noteId: string, isPinned: boolean) => void;
 }
 
 const ClientsContext = createContext<ClientsContextType | undefined>(undefined);
@@ -139,7 +143,28 @@ const generateMockClients = (): Client[] => {
       createdBy: '1',
       updatedAt: now,
       updatedBy: '1',
-      notes: 'Premier client with long-term partnership'
+      notes: [
+        {
+          id: '1',
+          content: 'Premier client with long-term partnership. Always prioritize their requests.',
+          authorId: '1',
+          authorName: 'John Doe',
+          createdAt: '2024-01-15T10:30:00Z',
+          isPinned: true,
+          tags: ['important', 'vip'],
+          category: 'Important'
+        },
+        {
+          id: '2',
+          content: 'Discussed Q2 hiring plans. They need 5 senior engineers by May.',
+          authorId: '1',
+          authorName: 'John Doe',
+          createdAt: '2024-03-10T14:20:00Z',
+          isPinned: false,
+          tags: ['hiring', 'planning'],
+          category: 'Meeting'
+        }
+      ]
     },
     {
       id: '2',
@@ -204,7 +229,8 @@ const generateMockClients = (): Client[] => {
       createdAt: '2024-02-01',
       createdBy: '2',
       updatedAt: now,
-      updatedBy: '2'
+      updatedBy: '2',
+      notes: []
     },
     {
       id: '3',
@@ -295,7 +321,17 @@ const generateMockClients = (): Client[] => {
       createdBy: '1',
       updatedAt: now,
       updatedBy: '1',
-      notes: 'Requires executive-level attention for all placements'
+      notes: [
+        {
+          id: '3',
+          content: 'Requires executive-level attention for all placements',
+          authorId: '1',
+          authorName: 'John Doe',
+          createdAt: '2024-01-12T09:00:00Z',
+          isPinned: true,
+          category: 'Important'
+        }
+      ]
     },
     {
       id: '4',
@@ -346,7 +382,8 @@ const generateMockClients = (): Client[] => {
       createdAt: '2024-02-01',
       createdBy: '3',
       updatedAt: now,
-      updatedBy: '3'
+      updatedBy: '3',
+      notes: []
     },
     {
       id: '5',
@@ -401,7 +438,18 @@ const generateMockClients = (): Client[] => {
       createdBy: '2',
       updatedAt: now,
       updatedBy: '2',
-      notes: 'Interested in building engineering team. Follow up in two weeks.'
+      notes: [
+        {
+          id: '4',
+          content: 'Interested in building engineering team. Follow up in two weeks.',
+          authorId: '2',
+          authorName: 'Jane Smith',
+          createdAt: '2024-03-12T11:00:00Z',
+          isPinned: false,
+          tags: ['follow-up'],
+          category: 'General'
+        }
+      ]
     },
     {
       id: '6',
@@ -452,7 +500,18 @@ const generateMockClients = (): Client[] => {
       createdBy: '1',
       updatedAt: now,
       updatedBy: '1',
-      notes: 'On hold due to payment issues. Review in Q2.'
+      notes: [
+        {
+          id: '5',
+          content: 'On hold due to payment issues. Review in Q2.',
+          authorId: '1',
+          authorName: 'John Doe',
+          createdAt: '2024-02-21T16:30:00Z',
+          isPinned: true,
+          tags: ['payment', 'on-hold'],
+          category: 'Important'
+        }
+      ]
     },
     {
       id: '7',
@@ -516,10 +575,13 @@ const generateMockClients = (): Client[] => {
       sentimentTags: ['preferred'],
       feedback: [],
       lastContactDate: '2024-03-13',
+      nextActionDate: '2024-04-15',
+      nextActionType: 'Growth Planning',
       createdAt: '2024-02-10',
       createdBy: '2',
       updatedAt: now,
-      updatedBy: '2'
+      updatedBy: '2',
+      notes: []
     },
     {
       id: '8',
@@ -580,7 +642,8 @@ const generateMockClients = (): Client[] => {
       createdAt: '2024-01-20',
       createdBy: '3',
       updatedAt: now,
-      updatedBy: '3'
+      updatedBy: '3',
+      notes: []
     },
     {
       id: '9',
@@ -635,7 +698,18 @@ const generateMockClients = (): Client[] => {
       createdBy: '1',
       updatedAt: now,
       updatedBy: '1',
-      notes: 'Finalizing contract terms. Expected to close by end of month.'
+      notes: [
+        {
+          id: '6',
+          content: 'Finalizing contract terms. Expected to close by end of month.',
+          authorId: '1',
+          authorName: 'John Doe',
+          createdAt: '2024-03-14T15:45:00Z',
+          isPinned: false,
+          tags: ['contract', 'negotiation'],
+          category: 'General'
+        }
+      ]
     },
     {
       id: '10',
@@ -678,7 +752,17 @@ const generateMockClients = (): Client[] => {
       createdBy: '2',
       updatedAt: '2024-01-15',
       updatedBy: '2',
-      notes: 'Contract ended. No longer active.'
+      notes: [
+        {
+          id: '7',
+          content: 'Contract ended. No longer active.',
+          authorId: '2',
+          authorName: 'Jane Smith',
+          createdAt: '2023-12-16T10:00:00Z',
+          isPinned: false,
+          category: 'General'
+        }
+      ]
     }
   ];
 };
@@ -855,6 +939,52 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const addNote = (clientId: string, noteData: Omit<ClientNote, 'id' | 'createdAt'>) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    const newNote: ClientNote = {
+      ...noteData,
+      id: String(Date.now()),
+      createdAt: new Date().toISOString(),
+    };
+
+    updateClient(clientId, {
+      notes: [newNote, ...client.notes],
+    });
+  };
+
+  const updateNote = (clientId: string, noteId: string, updates: Partial<ClientNote>) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    updateClient(clientId, {
+      notes: client.notes.map(note =>
+        note.id === noteId ? { ...note, ...updates, updatedAt: new Date().toISOString() } : note
+      ),
+    });
+  };
+
+  const deleteNote = (clientId: string, noteId: string) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    updateClient(clientId, {
+      notes: client.notes.filter(note => note.id !== noteId),
+    });
+  };
+
+  const pinNote = (clientId: string, noteId: string, isPinned: boolean) => {
+    const client = getClientById(clientId);
+    if (!client) return;
+
+    updateClient(clientId, {
+      notes: client.notes.map(note =>
+        note.id === noteId ? { ...note, isPinned } : note
+      ),
+    });
+  };
+
   return (
     <ClientsContext.Provider
       value={{
@@ -877,6 +1007,10 @@ export const ClientsProvider = ({ children }: { children: ReactNode }) => {
         addCommissionRule,
         updateCommissionRule,
         addFeedback,
+        addNote,
+        updateNote,
+        deleteNote,
+        pinNote,
       }}
     >
       {children}

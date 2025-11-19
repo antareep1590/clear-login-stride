@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { ClientNotesSection } from '@/components/ClientNotesSection';
 import {
   ArrowLeft,
   Edit,
@@ -31,7 +32,7 @@ import { toast } from '@/hooks/use-toast';
 export default function ClientProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getClientById, deleteContact, deleteDocument, addFeedback } = useClients();
+  const { getClientById, deleteContact, deleteDocument, addFeedback, addNote, updateNote, deleteNote, pinNote } = useClients();
   const { getEmployeeById } = useEmployees();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -243,12 +244,13 @@ export default function ClientProfile() {
           </Card>
 
           {/* Notes */}
-          {client.notes && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 text-foreground">Notes</h3>
-              <p className="text-muted-foreground">{client.notes}</p>
-            </Card>
-          )}
+          <ClientNotesSection
+            notes={client.notes}
+            onAddNote={(note) => addNote(client.id, note)}
+            onUpdateNote={(noteId, updates) => updateNote(client.id, noteId, updates)}
+            onDeleteNote={(noteId) => deleteNote(client.id, noteId)}
+            onPinNote={(noteId, isPinned) => pinNote(client.id, noteId, isPinned)}
+          />
         </TabsContent>
 
         {/* Contacts Tab */}

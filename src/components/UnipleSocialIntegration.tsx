@@ -359,7 +359,7 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
                               {candidate.jobApplied}
                             </div>
                             <div className="flex gap-1 mt-1">
-                              {candidate.tags.map((tag) => (
+                              {(candidate.tags || []).map((tag) => (
                                 <Badge key={tag} variant="outline" className="text-xs">
                                   {tag}
                                 </Badge>
@@ -555,7 +555,7 @@ export const UnipleSocialIntegration = ({ integration }: UnipleSocialIntegration
           </DialogHeader>
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-4">
-              {selectedThread?.messages.map((message) => (
+              {(selectedThread?.messages || []).map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${

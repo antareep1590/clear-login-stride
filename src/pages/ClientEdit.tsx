@@ -10,6 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { CustomFieldsSection } from '@/components/CustomFieldsSection';
+import { CustomFieldsData } from '@/types/customField';
+import { Separator } from '@/components/ui/separator';
 
 export default function ClientEdit() {
   const { id } = useParams();
@@ -18,9 +21,13 @@ export default function ClientEdit() {
   const { employees } = useEmployees();
   const client = getClientById(id!);
   const [formData, setFormData] = useState(client);
+  const [customFieldsData, setCustomFieldsData] = useState<CustomFieldsData>(client?.customFields || {});
 
   useEffect(() => {
-    if (client) setFormData(client);
+    if (client) {
+      setFormData(client);
+      setCustomFieldsData(client.customFields || {});
+    }
   }, [client]);
 
   if (!client || !formData) {
@@ -33,7 +40,7 @@ export default function ClientEdit() {
 
   const handleSubmit = () => {
     if (formData) {
-      updateClient(id!, formData);
+      updateClient(id!, { ...formData, customFields: customFieldsData });
       toast({ title: 'Client updated successfully' });
       navigate(`/clients/${id}`);
     }

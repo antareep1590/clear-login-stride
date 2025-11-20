@@ -17,6 +17,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { CustomFieldsSection } from '@/components/CustomFieldsSection';
+import { CustomFieldsData } from '@/types/customField';
+import { Separator } from '@/components/ui/separator';
 
 const steps = [
   { id: 1, name: 'Basic Info', description: 'Name, email, and role' },
@@ -35,7 +38,9 @@ export default function EmployeeNew() {
     status: 'active',
     role: 'recruiter',
     department: 'Recruitment',
+    customFields: {},
   });
+  const [customFieldsData, setCustomFieldsData] = useState<CustomFieldsData>({});
 
   const updateField = (field: keyof Employee, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -85,6 +90,7 @@ export default function EmployeeNew() {
     const now = new Date().toISOString();
     const newEmployee = addEmployee({
       ...formData as Omit<Employee, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>,
+      customFields: customFieldsData,
       dateOfJoining: formData.dateOfJoining || now,
       hireDate: formData.hireDate || now,
     });
@@ -333,11 +339,19 @@ export default function EmployeeNew() {
                       type="date"
                       value={formData.dateOfJoining || ''}
                       onChange={(e) => updateField('dateOfJoining', e.target.value)}
-                    />
-                  </div>
+                  />
                 </div>
-              </>
-            )}
+              </div>
+
+              <Separator className="my-6" />
+
+              <CustomFieldsSection
+                module="employees"
+                values={customFieldsData}
+                onChange={setCustomFieldsData}
+              />
+            </>
+          )}
 
             {currentStep === 4 && (
               <div className="space-y-6">

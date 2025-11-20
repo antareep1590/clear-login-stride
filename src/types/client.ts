@@ -187,7 +187,4 @@ export interface Client {
   updatedAt: string;
   updatedBy: string;
   notes: ClientNote[];
-  
-  // Custom Fields
-  customFields?: Record<string, any>;
 }

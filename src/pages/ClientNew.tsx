@@ -11,9 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Client } from '@/types/client';
 import { toast } from '@/hooks/use-toast';
-import { CustomFieldsSection } from '@/components/CustomFieldsSection';
-import { CustomFieldsData } from '@/types/customField';
-import { Separator } from '@/components/ui/separator';
 
 export default function ClientNew() {
   const navigate = useNavigate();
@@ -43,10 +40,7 @@ export default function ClientNew() {
     tags: [],
     sentimentTags: [],
     feedback: [],
-    customFields: {},
   });
-
-  const [customFieldsData, setCustomFieldsData] = useState<CustomFieldsData>({});
 
   const updateField = (field: keyof Client, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -60,7 +54,6 @@ export default function ClientNew() {
 
     const newClient = addClient({
       ...formData as Omit<Client, 'id' | 'createdAt' | 'updatedAt'>,
-      customFields: customFieldsData,
       createdBy: formData.ownerId,
       updatedBy: formData.ownerId,
     });

@@ -16,9 +16,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { CustomFieldsSection } from '@/components/CustomFieldsSection';
-import { CustomFieldsData } from '@/types/customField';
-import { Separator } from '@/components/ui/separator';
 
 const steps = [
   { id: 1, name: 'Basic Info', description: 'Name, email, and role' },
@@ -34,7 +31,6 @@ export default function EmployeeEdit() {
   
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<Employee>>({});
-  const [customFieldsData, setCustomFieldsData] = useState<CustomFieldsData>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,7 +48,6 @@ export default function EmployeeEdit() {
     }
 
     setFormData(employee);
-    setCustomFieldsData(employee.customFields || {});
     setLoading(false);
   }, [id, getEmployeeById, navigate]);
 
@@ -104,7 +99,7 @@ export default function EmployeeEdit() {
 
     if (!id) return;
 
-    updateEmployee(id, { ...formData as Partial<Employee>, customFields: customFieldsData });
+    updateEmployee(id, formData as Partial<Employee>);
     toast.success('Employee updated successfully');
     navigate(`/employees/${id}`);
   };
@@ -370,19 +365,11 @@ export default function EmployeeEdit() {
                       type="date"
                       value={formData.dateOfJoining?.split('T')[0] || ''}
                       onChange={(e) => updateField('dateOfJoining', e.target.value ? new Date(e.target.value).toISOString() : '')}
-                  />
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <Separator className="my-6" />
-
-              <CustomFieldsSection
-                module="employees"
-                values={customFieldsData}
-                onChange={setCustomFieldsData}
-              />
-            </>
-          )}
+              </>
+            )}
 
             {/* Step 4: Review */}
             {currentStep === 4 && (

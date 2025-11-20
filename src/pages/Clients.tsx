@@ -35,7 +35,7 @@ import {
   Tag,
   LayoutGrid,
   LayoutList,
-  Kanban,
+  
 } from 'lucide-react';
 import { Client } from '@/types/client';
 import { toast } from '@/hooks/use-toast';
@@ -256,13 +256,6 @@ export default function Clients() {
             onClick={() => setViewMode('grid')}
           >
             <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate('/clients/pipeline')}
-          >
-            <Kanban className="h-4 w-4" />
           </Button>
         </div>
       </div>

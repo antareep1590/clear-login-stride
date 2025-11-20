@@ -26,7 +26,7 @@ import Clients from "./pages/Clients";
 import ClientProfile from "./pages/ClientProfile";
 import ClientNew from "./pages/ClientNew";
 import ClientEdit from "./pages/ClientEdit";
-import ClientsPipeline from "./pages/ClientsPipeline";
+
 import ConnectionHub from "./pages/ConnectionHub";
 import NotFound from "./pages/NotFound";
 
@@ -60,7 +60,7 @@ const App = () => (
                   <Route path="/teams/:id/edit" element={<TeamEdit />} />
                   <Route path="/clients" element={<Clients />} />
                   <Route path="/clients/new" element={<ClientNew />} />
-                  <Route path="/clients/pipeline" element={<ClientsPipeline />} />
+                  
                   <Route path="/clients/:id" element={<ClientProfile />} />
                   <Route path="/clients/:id/edit" element={<ClientEdit />} />
                   <Route path="/connections" element={<ConnectionHub />} />

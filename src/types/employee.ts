@@ -101,4 +101,7 @@ export interface Employee {
   updatedAt: string;
   updatedBy: string;
   notes?: string;
+  
+  // Custom Fields
+  customFields?: Record<string, any>;
 }

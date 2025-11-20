@@ -107,7 +107,7 @@ export function EditPortalSettingsDialog({
               Select which job postings are visible to portal users
             </p>
             
-            {client.jobs.length === 0 ? (
+            {!client.jobs || client.jobs.length === 0 ? (
               <div className="text-center py-6 text-muted-foreground border border-border rounded-lg">
                 No jobs available for this client
               </div>

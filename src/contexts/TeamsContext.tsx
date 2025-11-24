@@ -36,6 +36,7 @@ const generateMockTeams = (): Team[] => {
       kpis: {
         hires: 8,
         placements: 12,
+        openings: 28,
         interviews: 45,
         revenue: 450000,
         feedbackScore: 4.6
@@ -44,6 +45,7 @@ const generateMockTeams = (): Team[] => {
       targetKPIs: {
         hires: 10,
         placements: 15,
+        openings: 35,
         interviews: 50,
         revenue: 500000,
         feedbackScore: 4.8
@@ -60,6 +62,7 @@ const generateMockTeams = (): Team[] => {
       kpis: {
         hires: 5,
         placements: 20,
+        openings: 42,
         interviews: 60,
         revenue: 800000,
         feedbackScore: 4.4
@@ -68,6 +71,7 @@ const generateMockTeams = (): Team[] => {
       targetKPIs: {
         hires: 6,
         placements: 25,
+        openings: 50,
         interviews: 70,
         revenue: 900000,
         feedbackScore: 4.6
@@ -84,6 +88,7 @@ const generateMockTeams = (): Team[] => {
       kpis: {
         hires: 3,
         placements: 8,
+        openings: 18,
         interviews: 25,
         revenue: 320000,
         feedbackScore: 4.8
@@ -92,6 +97,7 @@ const generateMockTeams = (): Team[] => {
       targetKPIs: {
         hires: 4,
         placements: 10,
+        openings: 25,
         interviews: 30,
         revenue: 400000,
         feedbackScore: 4.9

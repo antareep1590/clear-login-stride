@@ -1,8 +1,9 @@
 export type TeamStatus = 'active' | 'inactive';
 
 export interface TeamKPI {
-  hires: number;
-  placements: number;
+  hires: number; // Applicants who completed guarantee period (realized revenue)
+  placements: number; // Applicants who joined but guarantee period not completed (provisional revenue)
+  openings: number; // Openings created this year + openings with status updates this year
   interviews: number;
   revenue: number;
   feedbackScore: number;

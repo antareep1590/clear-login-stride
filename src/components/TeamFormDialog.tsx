@@ -131,6 +131,7 @@ export function TeamFormDialog({ team, open, onOpenChange, onSuccess }: TeamForm
       kpis: team?.kpis || {
         hires: 0,
         placements: 0,
+        openings: 0,
         interviews: 0,
         revenue: 0,
         feedbackScore: 0,

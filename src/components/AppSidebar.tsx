@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, UsersRound, Building2, Plug } from 'lucide-react';
+import { LayoutDashboard, Users, UsersRound, Building2, Plug, Mail } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
   Sidebar,
@@ -17,6 +17,7 @@ const navItems = [
   { title: 'Employees', url: '/employees', icon: Users },
   { title: 'Teams', url: '/teams', icon: UsersRound },
   { title: 'Clients', url: '/clients', icon: Building2 },
+  { title: 'Templates', url: '/templates', icon: Mail },
   { title: 'Connection Hub', url: '/connections', icon: Plug },
 ];
 

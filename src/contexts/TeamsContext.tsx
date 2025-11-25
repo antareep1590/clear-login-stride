@@ -49,7 +49,10 @@ const generateMockTeams = (): Team[] => {
         interviews: 50,
         revenue: 500000,
         feedbackScore: 4.8
-      }
+      },
+      targetRevenue1: 500000,
+      targetRevenue2: 600000,
+      messagingEnabled: true,
     },
     {
       id: '2',
@@ -75,7 +78,10 @@ const generateMockTeams = (): Team[] => {
         interviews: 70,
         revenue: 900000,
         feedbackScore: 4.6
-      }
+      },
+      targetRevenue1: 900000,
+      targetRevenue2: 1100000,
+      messagingEnabled: true,
     },
     {
       id: '3',
@@ -101,7 +107,10 @@ const generateMockTeams = (): Team[] => {
         interviews: 30,
         revenue: 400000,
         feedbackScore: 4.9
-      }
+      },
+      targetRevenue1: 400000,
+      targetRevenue2: 500000,
+      messagingEnabled: false,
     }
   ];
 };

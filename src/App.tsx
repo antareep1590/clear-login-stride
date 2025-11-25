@@ -28,6 +28,7 @@ import ClientNew from "./pages/ClientNew";
 import ClientEdit from "./pages/ClientEdit";
 
 import ConnectionHub from "./pages/ConnectionHub";
+import TemplateManager from "./pages/TemplateManager";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
                   
                   <Route path="/clients/:id" element={<ClientProfile />} />
                   <Route path="/clients/:id/edit" element={<ClientEdit />} />
+                  <Route path="/templates" element={<TemplateManager />} />
                   <Route path="/connections" element={<ConnectionHub />} />
                 </Route>
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
